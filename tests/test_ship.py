@@ -9,6 +9,7 @@ from django.urls import reverse
 from api_v1 import serializers
 
 from rest_framework.test import APIClient
+import pytz
 
 pytestmark = [
     pytest.mark.django_db,
@@ -60,7 +61,7 @@ def ships():
         df = pd.read_excel(way + file_name)
         for i in df.values:
             code = i[0]
-            dt = datetime.datetime.combine(datetime.datetime.date(i[1]), i[2])
+            dt = datetime.datetime.combine(datetime.datetime.date(i[1]), i[2], tzinfo=pytz.UTC)
             lat = i[3]
             lng = i[4]
             name = i[5]
