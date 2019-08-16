@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+  redis:
+    image: "redis:alpine"
+    hostname: redis
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
+  web:
+    build: .
+    command: >
+      bash -c '
+      python manage.py makemigrations service
+      &&
+      python manage.py migrate
+      &&
+      python manage.py runserver 0.0.0.0:8000'
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+  celery:
+    build: .
+    command: celery -A Everpoint worker -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
+  celery-beat:
+    build: .
+    command: celery -A Everpoint beat -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
